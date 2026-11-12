@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mathe 9: Potenzen &amp; Gesetze Interaktiv (1. &amp; 2. Stunde)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --dark: #1e293b;
+      --muted: #64748b;
+      --border: #cbd5e1;
+      --green-bg: #dcfce7;
+      --green-border: #22c55e;
+      --green-text: #15803d;
+      --red-bg: #fee2e2;
+      --red-border: #ef4444;
+      --red-text: #b91c1c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--dark);
+      margin: 0;
+      padding: 16px;
+      line-height: 1.45;
+    }
+    .container-main { max-width: 960px; margin: 0 auto; }
+    .math {
+      font-family: "Cambria Math", "Times New Roman", Georgia, serif;
+      font-size: 1.12em;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+    .math sup {
+      font-size: 0.72em;
+      vertical-align: super;
+      line-height: 0;
+      margin-left: 1px;
+    }
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      font-size: 0.85em;
+      padding: 0 2px;
+    }
+    .frac > span:first-child { border-bottom: 1.5px solid currentColor; padding: 0 2px; }
+    .correct-card {
+      background-color: var(--green-bg) !important;
+      border-color: var(--green-border) !important;
+    }
+    .wrong-card {
+      background-color: var(--red-bg) !important;
+      border-color: var(--red-border) !important;
+    }
+    .chip-done {
+      background-color: #dcfce7 !important;
+      border-color: #16a34a !important;
+      color: #15803d !important;
+      text-decoration: line-through;
+      opacity: 0.75;
+    }
+    .hidden { display: none !important; }
+    input[type="text"], select {
+      border: 1.5px solid #94a3b8;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 0.95rem;
+      background: #fff;
+    }
+    input[type="text"]:focus, select:focus {
+      outline: 2px solid #2563eb;
+      border-color: #2563eb;
+    }
+    button { cursor: pointer; transition: all 0.15s ease; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 p-3 md:p-6 min-h-screen">
+  <div class="container-main space-y-5">
+
+    <!-- HEADER + LIVE-TAKTPUNKT-TIMER FÜR KURZE ARBEITSPHASEN -->
+    <header class="bg-white border-2 border-slate-800 rounded-xl p-4 md:p-5 shadow-sm">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Mathematik 9 | Herr Dayi | Convertible-Version</span>
+          <h1 class="text-xl md:text-2xl font-black text-slate-900">Potenzen &amp; Potenzgesetze – Interaktives Runden-Training</h1>
+          <p class="text-xs text-slate-600 mt-0.5">Arbeite Runde für Runde. Nutze bei Fragen zuerst den <b>💡 Tipp</b>-Button und prüfe dein Ergebnis sofort selbst!</p>
+        </div>
+
+        <!-- Score Counter -->
+        <div class="flex items-center gap-3 self-stretch md:self-auto justify-between bg-slate-100 px-4 py-2 rounded-lg border-2 border-slate-300">
+          <div>
+            <div class="text-xs font-bold uppercase text-slate-500">Erledigt</div>
+            <div class="text-xl font-black text-emerald-700"><span id="score">0</span> <span class="text-xs font-normal text-slate-500">Aufgaben</span></div>
+          </div>
+          <div class="h-8 w-px bg-slate-300"></div>
+          <!-- Mini Timer -->
+          <div class="text-right">
+            <div class="text-xs font-bold uppercase text-slate-500">Runden-Timer</div>
+            <div id="timer-display" class="text-xl font-mono font-black text-slate-900">08:00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timer Steuerung (für kurze Taktphasen) -->
+      <div class="mt-3 pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div class="flex flex-wrap items-center gap-1.5">
+          <span class="font-bold text-slate-600 mr-1">⏱️ Takt-Phase wählen:</span>
+          <button onclick="setTimer(6)" class="px-2.5 py-1 bg-slate-200 hover:bg-slate-300 font-bold rounded">6 Min. (Sprint)</button>
+          <button onclick="setTimer(8)" class="px-2.5 py-1 bg-slate-200 hover:bg-slate-300 font-bold rounded">8 Min. (Runde)</button>
+          <button onclick="setTimer(3)" class="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold rounded border border-amber-300">3 Min. (Stopp-Check)</button>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="toggleTimer()" id="btn-timer-start" class="px-3 py-1 bg-slate-800 text-white font-bold rounded hover:bg-slate-900">▶ Start / Pause</button>
+          <button onclick="resetTimer()" class="px-2.5 py-1 bg-slate-200 text-slate-700 font-bold rounded hover:bg-slate-300">↺ Reset</button>
+        </div>
+      </div>
+      <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden mt-2">
+        <div id="timer-bar" class="bg-emerald-600 h-full transition-all duration-500" style="width: 100%"></div>
+      </div>
+    </header>
+
+    <!-- HAUPT-TABS -->
+    <div class="flex flex-wrap gap-2 border-b-2 border-slate-300 pb-1">
+      <button onclick="switchTab('tab-sprache')" id="btn-sprache" class="px-4 py-2.5 font-bold text-sm rounded-t-lg bg-slate-900 text-white">
+        🗣️ 1. Stunde: Sprachförderung (3 Runden)
+      </button>
+      <button onclick="switchTab('tab-trainer')" id="btn-trainer" class="px-4 py-2.5 font-bold text-sm rounded-t-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-200">
+        🧮 2. Stunde: Gemischte Aufgaben (3 Runden)
+      </button>
+      <button onclick="switchTab('tab-spickzettel')" id="btn-spickzettel" class="px-4 py-2.5 font-bold text-sm rounded-t-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-200">
+        📘 Spickzettel &amp; Alle Rechenwege
+      </button>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- TAB 1: 1. STUNDE - SPRACHFÖRDERUNG (FORTGESCHRITTEN IN 3 RUNDEN)    -->
+    <!-- =================================================================== -->
+    <section id="tab-sprache" class="space-y-5">
+
+      <!-- Wortspeicher Box (Fortgeschritten) -->
+      <div class="bg-slate-800 text-white rounded-xl p-4 shadow-sm">
+        <div class="text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">Wortspeicher für Fortgeschrittene: Präzise argumentieren</div>
+        <div class="text-xs md:text-sm space-y-1">
+          <div><b>Terme benennen:</b> das <b>Produkt</b> (<span class="math">&middot;</span>) &middot; der <b>Quotient</b> (<span class="math">:</span> / Bruch) &middot; die <b>Summe</b> (<span class="math">+</span>) &middot; der <b>Koeffizient</b> (Vorfaktor, z.&thinsp;B. <span class="math">3</span> bei <span class="math">3y<sup>4</sup></span>)</div>
+          <div><b>Operationen:</b> die Basis <b>beibehalten</b> &middot; Exponenten <b>addieren / subtrahieren / multiplizieren</b> &middot; jeden Faktor in der Klammer <b>einzeln potenzieren</b></div>
+        </div>
+      </div>
+
+      <!-- SPRACHE RUNDE 1: VOM FACHTEXT ZUM TERM -->
+      <div class="bg-white border-2 border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+        <div class="flex flex-wrap justify-between items-center gap-2 border-b pb-3">
+          <div class="flex items-center gap-2">
+            <span class="bg-slate-900 text-white text-xs font-black px-2.5 py-1 rounded">Runde 1</span>
+            <h2 class="text-base md:text-lg font-black text-slate-900">Vom Fachtext zum Term: Übersetze &amp; vereinfache! (8 Min.)</h2>
+          </div>
+          <button onclick="toggleHint('hint-sp1')" class="text-xs font-bold px-2.5 py-1 rounded bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200">💡 Übersetzungshilfe</button>
+        </div>
+
+        <div id="hint-sp1" class="hidden bg-amber-50 border border-amber-300 rounded-lg p-3 text-xs text-amber-950 space-y-1">
+          <div><b>Übersetzungs-Spickzettel:</b> „das <b>Quadrat</b> von x“ &rarr; <span class="math">x<sup>2</sup></span> &middot; „den <b>Quotienten</b> aus <span class="math">a<sup>7</sup></span> und <span class="math">a<sup>4</sup></span> mit 3 potenzieren“ &rarr; Klammer setzen: <span class="math">(a<sup>7</sup> : a<sup>4</sup>)<sup>3</sup></span> &middot; „das Produkt <span class="math">3y<sup>4</sup></span> quadrieren“ &rarr; <span class="math">(3y<sup>4</sup>)<sup>2</sup> = 3<sup>2</sup> &middot; (y<sup>4</sup>)<sup>2</sup> = 9y<sup>8</sup></span>.</div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+          <!-- 1a -->
+          <div class="p-3.5 bg-slate-50 border rounded-lg space-y-2" id="box-sp1a">
+            <div class="text-xs font-bold text-slate-500">a) Stufe 1</div>
+            <p class="text-xs md:text-sm">„Multipliziere die vierte Potenz von <span class="math">x</span> mit dem Quadrat von <span class="math">x</span> und dividiere das Produkt anschließend durch <span class="math">x<sup>3</sup></span>.“</p>
+            <div class="text-xs text-slate-600 font-mono">Ansatz: x^4 &middot; x^2 : x^3 =</div>
+            <div class="flex items-center gap-2">
+              <input type="text" id="ans-sp1a" placeholder="Endergebnis (z.B. x^3)" class="w-full text-xs font-mono font-bold" onkeydown="if(event.key==='Enter')checkInput('sp1a',['x^3'])">
+              <button onclick="checkInput('sp1a',['x^3'])" class="px-3 py-1.5 bg-slate-800 text-white text-xs font-bold rounded">Prüfen</button>
+            </div>
+            <div id="fb-sp1a" class="text-xs font-bold"></div>
+          </div>
+
+          <!-- 1b -->
+          <div class="p-3.5 bg-slate-50 border rounded-lg space-y-2" id="box-sp1b">
+            <div class="text-xs font-bold text-slate-500">b) Stufe 2</div>
+            <p class="text-xs md:text-sm">„Bilde den Quotienten aus <span class="math">a<sup>7</sup></span> und <span class="math">a<sup>4</sup></span> und potenziere dieses Ergebnis anschließend mit dem Exponenten <span class="math">3</span>.“</p>
+            <div class="text-xs text-slate-600 font-mono">Ansatz: (a^7 : a^4)^3 =</div>
+            <div class="flex items-center gap-2">
+              <input type="text" id="ans-sp1b" placeholder="Endergebnis (z.B. a^9)" class="w-full text-xs font-mono font-bold" onkeydown="if(event.key==='Enter')checkInput('sp1b',['a^9'])">
+              <button onclick="checkInput('sp1b',['a^9'])" class="px-3 py-1.5 bg-slate-800 text-white text-xs font-bold rounded">Prüfen</button>
+            </div>
+            <div id="fb-sp1b" class="text-xs font-bold"></div>
+          </div>
+
+          <!-- 1c -->
+          <div class="p-3.5 bg-slate-50 border rounded-lg space-y-2" id="box-sp1c">
+            <div class="text-xs font-bold text-slate-500">c) Stufe 2</div>
+            <p class="text-xs md:text-sm">„Multipliziere die dritte Potenz von <span class="math">2,5</span> mit der dritten Potenz von <span class="math">4</span> und berechne den Potenzwert im Kopf.“</p>
+            <div class="text-xs text-slate-600 font-mono">Ansatz: 2,5^3 &middot; 4^3 = (2,5 &middot; 4)^3 =</div>
+            <div class="flex items-center gap-2">
+              <input type="text" id="ans-sp1c" placeholder="Zahl oder 10^3" class="w-full text-xs font-mono font-bold" onkeydown="if(event.key==='Enter')checkInput('sp1c',['1000','10^3'])">
+              <button onclick="checkInput('sp1c',['1000','10^3'])" class="px-3 py-1.5 bg-slate-800 text-white text-xs font-bold rounded">Prüfen</button>
+            </div>
+            <div id="fb-sp1c" class="text-xs font-bold"></div>
+          </div>
+
+          <!-- 1d -->
+          <div class="p-3.5 bg-slate-50 border rounded-lg space-y-2" id="box-sp1d">
+            <div class="text-xs font-bold text-slate-500">d) Stufe 3</div>
+            <p class="text-xs md:text-sm">„Quadriere das Produkt aus dem Vorfaktor <span class="math">3</span> und der Potenz <span class="math">y<sup>4</sup></span> und multipliziere danach mit <span class="math">y<sup>2</sup></span>.“</p>
+            <div class="text-xs text-slate-600 font-mono">Ansatz: (3y^4)^2 &middot; y^2 = 9y^8 &middot; y^2 =</div>
+            <div class="flex items-center gap-2">
+              <input type="text" id="ans-sp1d" placeholder="z.B. 9y^10" class="w-full text-xs font-mono font-bold" onkeydown="if(event.key==='Enter')checkInput('sp1d',['9y^10'])">
+              <button onclick="checkInput('sp1d',['9y^10'])" class="px-3 py-1.5 bg-slate-800 text-white text-xs font-bold rounded">Prüfen</button>
+            </div>
+            <div id="fb-sp1d" class="text-xs font-bold"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SPRACHE RUNDE 2: ZWEI-SCHRITT-TERME KOMMENTIEREN -->
+      <div class="bg-white border-2 border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+        <div class="flex flex-wrap justify-between items-center gap-2 border-b pb-3">
+          <div class="flex items-center gap-2">
+            <span class="bg-slate-900 text-white text-xs font-black px-2.5 py-1 rounded">Runde 2</span>
+            <h2 class="text-base md:text-lg font-black text-slate-900">Zwei-Schritt-Terme: Rechnen &amp; Rechenweg sprachlich begründen (8 Min.)</h2>
+          </div>
+          <button onclick="toggleHint('hint-sp2')" class="text-xs font-bold px-2.5 py-1 rounded bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200">💡 Tipp anzeigen</button>
+        </div>
+
+        <div id="hint-sp2" class="hidden bg-amber-50 border border-amber-300 rounded-lg p-3 text-xs text-amber-950">
+          <b>Vorfahrtsregel:</b> Bei <span class="math">(x<sup>3</sup>)<sup>4</sup> &middot; x<sup>5</sup></span> löst man im 1. Schritt die Klammer mit dem <b>3. Gesetz</b> auf (Exponenten <b>multiplizieren</b>: <span class="math">x<sup>12</sup></span>). Im 2. Schritt multipliziert man zwei Potenzen mit gleicher <b>Basis</b> (Exponenten <b>addieren</b>: <span class="math">x<sup>17</sup></span>).
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <!-- Fall A -->
+          <div class="p-4 bg-slate-50 border rounded-lg space-y-2.5" id="box-sp2A">
+            <div class="font-black text-base text-slate-900">Fall A: <span class="math">(x<sup>3</sup>)<sup>4</sup> &middot; x<sup>5</sup></span></div>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="font-bold">Endergebnis:</span>
+              <input type="text" id="ans-sp2A" placeholder="z.B. x^17" class="w-28 text-center font-mono font-bold" onkeydown="if(event.key==='Enter')checkInput('sp2A',['x^17'])">
+              <button onclick="checkInput('sp2A',['x^17'])" class="px-2.5 py-1 bg-slate-800 text-white font-bold rounded">Prüfen</button>
+              <span id="fb-sp2A" class="font-bold"></span>
+            </div>
+            <p class="text-xs leading-relaxed">
+              <b>1. Schritt:</b> Weil die Potenz <span class="math">x<sup>3</sup></span> mit 4 potenziert wird (3. Gesetz), werden die Exponenten 3 und 4
+              <select id="sel-sp2A1" onchange="checkSelect('sel-sp2A1','multipliziert','fb-sp2A1','box-sp2A')" class="font-bold text-xs">
+                <option value="">-- ? --</option>
+                <option value="addiert">addiert</option>
+                <option value="multipliziert">multipliziert</option>
+                <option value="subtrahiert">subtrahiert</option>
+              </select> (<span class="math">= x<sup>12</sup></span>). <span id="fb-sp2A1" class="font-bold"></span><br>
+              <b>2. Schritt:</b> Da nun ein Produkt mit gleicher
+              <select id="sel-sp2A2" onchange="checkSelect('sel-sp2A2','Basis','fb-sp2A2','box-sp2A')" class="font-bold text-xs">
+                <option value="">-- ? --</option>
+                <option value="Basis">Basis</option>
+                <option value="Hochzahl">Hochzahl</option>
+                <option value="Summe">Summe</option>
+              </select>
+              vorliegt (1. Gesetz), werden die Exponenten 12 und 5 addiert. <span id="fb-sp2A2" class="font-bold"></span>
+            </p>
+          </div>
+
+          <!-- Fall B -->
+          <div class="p-4 bg-slate-50 border rounded-lg space-y-2.5" id="box-sp2B">
+            <div class="font-black text-base text-slate-900">Fall B: <span class="math">(2<sup>4</sup> &middot; 15<sup>4</sup> : 10<sup>4</sup>) : 3<sup>2</sup></span></div>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="font-bold">Endergebnis:</span>
+              <input type="text" id="ans-sp2B" placeholder="z.B. 3^2 oder 9" class="w-28 text-center font-mono font-bold" onkeydown="if(event.key==='Enter')checkInput('sp2B',['9','3^2'])">
+              <button onclick="checkInput('sp2B',['9','3^2'])" class="px-2.5 py-1 bg-slate-800 text-white font-bold rounded">Prüfen</button>
+              <span id="fb-sp2B" class="font-bold"></span>
+            </div>
+            <p class="text-xs leading-relaxed">
+              <b>1. Schritt:</b> Weil alle Potenzen in der Klammer denselben
+              <select id="sel-sp2B1" onchange="checkSelect('sel-sp2B1','Exponenten','fb-sp2B1','box-sp2B')" class="font-bold text-xs">
+                <option value="">-- ? --</option>
+                <option value="Basis">Basis</option>
+                <option value="Exponenten">Exponenten</option>
+                <option value="Quotienten">Quotienten</option>
+              </select>
+              4 haben (2. Gesetz), rechne ich <span class="math">(2 &middot; 15 : 10)<sup>4</sup> = 3<sup>4</sup></span>. <span id="fb-sp2B1" class="font-bold"></span><br>
+              <b>2. Schritt:</b> Nun dividiere ich <span class="math">3<sup>4</sup> : 3<sup>2</sup></span> bei gleicher Basis 3, indem ich die Exponenten
+              <select id="sel-sp2B2" onchange="checkSelect('sel-sp2B2','subtrahiere','fb-sp2B2','box-sp2B')" class="font-bold text-xs">
+                <option value="">-- ? --</option>
+                <option value="dividiere">dividiere</option>
+                <option value="subtrahiere">subtrahiere</option>
+                <option value="multipliziere">multipliziere</option>
+              </select>. <span id="fb-sp2B2" class="font-bold"></span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SPRACHE RUNDE 3: FEHLER-GUTACHTEN FÜR PROFIS -->
+      <div class="bg-white border-2 border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+        <div class="flex flex-wrap justify-between items-center gap-2 border-b pb-3">
+          <div class="flex items-center gap-2">
+            <span class="bg-slate-900 text-white text-xs font-black px-2.5 py-1 rounded">Runde 3</span>
+            <h2 class="text-base md:text-lg font-black text-slate-900">Fehler-Gutachten: Warum ist die Umformung falsch? (8 Min.)</h2>
+          </div>
+          <button onclick="toggleHint('hint-sp3')" class="text-xs font-bold px-2.5 py-1 rounded bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200">💡 Tipp zu den 3 Fallen</button>
+        </div>
+
+        <div id="hint-sp3" class="hidden bg-amber-50 border border-amber-300 rounded-lg p-3 text-xs text-amber-950 space-y-1">
+          <div><b>Falle 1 (<span class="math">x<sup>3</sup> + x<sup>3</sup></span>):</b> Für eine <b>Summe</b> (<span class="math">+</span>) gibt es kein Potenzgesetz! <span class="math">1x<sup>3</sup> + 1x<sup>3</sup> = 2x<sup>3</sup></span>.</div>
+          <div><b>Falle 2 (<span class="math">(4a<sup>3</sup>)<sup>2</sup></span>):</b> Auch der <b>Koeffizient (Vorfaktor)</b> 4 in der Klammer muss quadriert werden (<span class="math">4<sup>2</sup> = 16</span> &rarr; <span class="math">16a<sup>6</sup></span>).</div>
+          <div><b>Falle 3 (<span class="math">5<sup>3</sup> &middot; 5<sup>4</sup></span>):</b> Bei gleicher Basis wird die Basis 5 <b>beibehalten</b> (<span class="math">5<sup>7</sup></span>, nicht <span class="math">25<sup>7</sup></span>!).</div>
+        </div>
+
+        <div class="space-y-3 text-xs md:text-sm">
+          <!-- Falle 1 -->
+          <div class="p-3.5 bg-slate-50 border rounded-lg space-y-2" id="box-falle1">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="font-bold text-rose-700">❌ Falsch: <span class="math">x<sup>3</sup> + x<sup>3</sup> = x<sup>6</sup></span></span>
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold">Richtig ist:</span>
+                <input type="text" id="ans-falle1" placeholder="z.B. 2x^3" class="w-24 text-center font-mono font-bold" onkeydown="if(event.key==='Enter')checkInput('falle1',['2x^3'])">
+                <button onclick="checkInput('falle1',['2x^3'])" class="px-2.5 py-1 bg-slate-800 text-white text-xs font-bold rounded">OK</button>
+                <span id="fb-falle1" class="font-bold"></span>
+              </div>
+            </div>
+            <div>
+              <i>Begründung:</i> Das 1. Potenzgesetz gilt nur bei einem <b>Produkt</b> (<span class="math">&middot;</span>), hier steht aber eine
+              <select id="sel-falle1" onchange="checkSelect('sel-falle1','Summe','fb-sel-falle1','box-falle1')" class="font-bold text-xs">
+                <option value="">-- wählen --</option>
+                <option value="Summe">Summe (+)</option>
+                <option value="Potenz">Potenz</option>
+                <option value="Division">Division (:)</option>
+              </select>. <span id="fb-sel-falle1" class="font-bold"></span>
+            </div>
+          </div>
+
+          <!-- Falle 2 -->
+          <div class="p-3.5 bg-slate-50 border rounded-lg space-y-2" id="box-falle2">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="font-bold text-rose-700">❌ Falsch: <span class="math">(4a<sup>3</sup>)<sup>2</sup> = 4a<sup>6</sup></span></span>
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold">Richtig ist:</span>
+                <input type="text" id="ans-falle2" placeholder="z.B. 16a^6" class="w-24 text-center font-mono font-bold" onkeydown="if(event.key==='Enter')checkInput('falle2',['16a^6'])">
+                <button onclick="checkInput('falle2',['16a^6'])" class="px-2.5 py-1 bg-slate-800 text-white text-xs font-bold rounded">OK</button>
+                <span id="fb-falle2" class="font-bold"></span>
+              </div>
+            </div>
+            <div>
+              <i>Begründung:</i> Jeder Faktor in der Klammer muss quadriert werden, also auch der
+              <select id="sel-falle2" onchange="checkSelect('sel-falle2','Koeffizient','fb-sel-falle2','box-falle2')" class="font-bold text-xs">
+                <option value="">-- wählen --</option>
+                <option value="Exponent">Exponent</option>
+                <option value="Koeffizient">Koeffizient / Vorfaktor 4</option>
+                <option value="Summand">Summand</option>
+              </select> (<span class="math">4<sup>2</sup> = 16</span>). <span id="fb-sel-falle2" class="font-bold"></span>
+            </div>
+          </div>
+
+          <!-- Falle 3 -->
+          <div class="p-3.5 bg-slate-50 border rounded-lg space-y-2" id="box-falle3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="font-bold text-rose-700">❌ Falsch: <span class="math">5<sup>3</sup> &middot; 5<sup>4</sup> = 25<sup>7</sup></span></span>
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold">Richtig ist:</span>
+                <input type="text" id="ans-falle3" placeholder="z.B. 5^7" class="w-24 text-center font-mono font-bold" onkeydown="if(event.key==='Enter')checkInput('falle3',['5^7'])">
+                <button onclick="checkInput('falle3',['5^7'])" class="px-2.5 py-1 bg-slate-800 text-white text-xs font-bold rounded">OK</button>
+                <span id="fb-falle3" class="font-bold"></span>
+              </div>
+            </div>
+            <div>
+              <i>Begründung:</i> Weil die Basis 5 gleich ist, werden die Exponenten addiert und die Basis 5 wird
+              <select id="sel-falle3" onchange="checkSelect('sel-falle3','beibehalten','fb-sel-falle3','box-falle3')" class="font-bold text-xs">
+                <option value="">-- wählen --</option>
+                <option value="multipliziert">ebenfalls multipliziert</option>
+                <option value="beibehalten">beibehalten (bleibt 5)</option>
+                <option value="halbiert">halbiert</option>
+              </select>. <span id="fb-sel-falle3" class="font-bold"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 2: 2. STUNDE - GEMISCHTE AUFGABEN IN 3 RUNDEN                   -->
+    <!-- =================================================================== -->
+    <section id="tab-trainer" class="hidden space-y-5">
+
+      <!-- Blick-Check Kompass -->
+      <div class="bg-slate-800 text-white rounded-xl p-4 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+        <div class="bg-slate-700/70 p-2.5 rounded-lg">
+          <div class="font-black text-amber-300">1. Basis unten gleich? (<span class="math">2<sup>3</sup> &middot; 2<sup>4</sup></span>)</div>
+          <div class="mt-1">Exponenten <b>PLUS</b> (<span class="math">+</span>) rechnen, bei Geteilt (<span class="math">:</span>) <b>MINUS</b> (<span class="math">&minus;</span>).</div>
+        </div>
+        <div class="bg-slate-700/70 p-2.5 rounded-lg">
+          <div class="font-black text-emerald-300">2. Exponent oben gleich? (<span class="math">2<sup>3</sup> &middot; 5<sup>3</sup></span>)</div>
+          <div class="mt-1">Unten in Klammer <span class="math">(2 &middot; 5)<sup>3</sup></span> rechnen, Exponent <b>BLEIBT</b>.</div>
+        </div>
+        <div class="bg-slate-700/70 p-2.5 rounded-lg">
+          <div class="font-black text-sky-300">3. Klammer mit Hochzahl? (<span class="math">(2<sup>3</sup>)<sup>4</sup></span>)</div>
+          <div class="mt-1">Die beiden Exponenten <b>MALNEHMEN</b> (<span class="math">&middot;</span>).</div>
+        </div>
+      </div>
+
+      <!-- =============================================================== -->
+      <!-- RUNDE 1 (12 Aufgaben: Stufe 1, 2, 3)                            -->
+      <!-- =============================================================== -->
+      <div class="bg-white border-2 border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+        <div class="flex flex-wrap justify-between items-center gap-2 border-b pb-3">
+          <div class="flex items-center gap-2">
+            <span class="bg-slate-900 text-white text-xs font-black px-2.5 py-1 rounded">Runde 1</span>
+            <h2 class="text-base md:text-lg font-black text-slate-900">Welches Gesetz passt? (8 Min. Arbeitsphase &rarr; Stopp-Check)</h2>
+          </div>
+          <span class="text-xs text-slate-500">Schreibweise z.&thinsp;B. <code>2^8</code>, <code>400</code> oder <code>(ab)^3</code></span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="r1-grid"></div>
+
+        <!-- Sofort-Kontrolle Abstreichkasten Runde 1 -->
+        <div class="bg-slate-100 border border-slate-300 rounded-lg p-3 text-xs">
+          <div class="font-bold text-slate-700 mb-1.5">✅ Selbstkontrolle Runde 1 (gefundene Lösungen werden automatisch durchgestrichen):</div>
+          <div class="flex flex-wrap gap-1.5" id="chips-r1"></div>
+        </div>
+      </div>
+
+      <!-- =============================================================== -->
+      <!-- RUNDE 2 (12 Aufgaben: Stufe 1, 2, 3)                            -->
+      <!-- =============================================================== -->
+      <div class="bg-white border-2 border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+        <div class="flex flex-wrap justify-between items-center gap-2 border-b pb-3">
+          <div class="flex items-center gap-2">
+            <span class="bg-slate-900 text-white text-xs font-black px-2.5 py-1 rounded">Runde 2</span>
+            <h2 class="text-base md:text-lg font-black text-slate-900">Gemischte Terme vereinfachen (8 Min. Arbeitsphase &rarr; Stopp-Check)</h2>
+          </div>
+          <span class="text-xs text-slate-500">Tipp-Button nutzen, wenn du festhängst!</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="r2-grid"></div>
+
+        <!-- Sofort-Kontrolle Abstreichkasten Runde 2 -->
+        <div class="bg-slate-100 border border-slate-300 rounded-lg p-3 text-xs">
+          <div class="font-bold text-slate-700 mb-1.5">✅ Selbstkontrolle Runde 2 (gefundene Lösungen werden automatisch durchgestrichen):</div>
+          <div class="flex flex-wrap gap-1.5" id="chips-r2"></div>
+        </div>
+      </div>
+
+      <!-- =============================================================== -->
+      <!-- RUNDE 3 (Fehler-Detektive: Wahr oder Falsch?)                   -->
+      <!-- =============================================================== -->
+      <div class="bg-white border-2 border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+        <div class="flex flex-wrap justify-between items-center gap-2 border-b pb-3">
+          <div class="flex items-center gap-2">
+            <span class="bg-slate-900 text-white text-xs font-black px-2.5 py-1 rounded">Runde 3</span>
+            <h2 class="text-base md:text-lg font-black text-slate-900">Fehler-Detektive: Wahr oder Falsch? (6 Min. &rarr; Stopp-Check)</h2>
+          </div>
+          <span class="text-xs text-slate-500">Genau 3 sind wahr und 3 sind falsch!</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="r3-grid"></div>
+      </div>
+
+      <!-- =============================================================== -->
+      <!-- SPRINTER-AUFGABE                                                -->
+      <!-- =============================================================== -->
+      <div class="bg-white border-2 border-slate-800 rounded-xl p-5 shadow-sm space-y-3">
+        <div class="flex items-center gap-2">
+          <span class="bg-amber-500 text-white text-xs font-black px-2.5 py-1 rounded">🏃 Sprinter</span>
+          <h3 class="text-base font-black text-slate-900">Schnelldenker-Aufgabe:Welche Hochzahl fehlt im Kästchen?</h3>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="p-3 bg-slate-50 border rounded-lg flex items-center justify-between" id="box-sp1">
+            <span class="math">2<sup>&#9633;</sup> &middot; 2<sup>4</sup> = 2<sup>11</sup></span>
+            <div class="flex items-center gap-1.5">
+              <input type="text" id="ans-sp1" placeholder="&#9633;" class="w-14 text-center font-bold" onkeydown="if(event.key==='Enter')checkInput('sp1',['7'])">
+              <button onclick="checkInput('sp1',['7'])" class="px-2.5 py-1 bg-slate-800 text-white text-xs font-bold rounded">OK</button>
+              <span id="fb-sp1" class="text-xs font-bold"></span>
+            </div>
+          </div>
+          <div class="p-3 bg-slate-50 border rounded-lg flex items-center justify-between" id="box-sp2">
+            <span class="math">(x<sup>3</sup>)<sup>&#9633;</sup> = x<sup>15</sup></span>
+            <div class="flex items-center gap-1.5">
+              <input type="text" id="ans-sp2" placeholder="&#9633;" class="w-14 text-center font-bold" onkeydown="if(event.key==='Enter')checkInput('sp2',['5'])">
+              <button onclick="checkInput('sp2',['5'])" class="px-2.5 py-1 bg-slate-800 text-white text-xs font-bold rounded">OK</button>
+              <span id="fb-sp2" class="text-xs font-bold"></span>
+            </div>
+          </div>
+          <div class="p-3 bg-slate-50 border rounded-lg flex items-center justify-between" id="box-sp3">
+            <span class="math">4<sup>3</sup> &middot; 5<sup>&#9633;</sup> = 20<sup>3</sup></span>
+            <div class="flex items-center gap-1.5">
+              <input type="text" id="ans-sp3" placeholder="&#9633;" class="w-14 text-center font-bold" onkeydown="if(event.key==='Enter')checkInput('sp3',['3'])">
+              <button onclick="checkInput('sp3',['3'])" class="px-2.5 py-1 bg-slate-800 text-white text-xs font-bold rounded">OK</button>
+              <span id="fb-sp3" class="text-xs font-bold"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 3: SPICKZETTEL & SCHRITT-FÜR-SCHRITT-HILFEN                     -->
+    <!-- =================================================================== -->
+    <section id="tab-spickzettel" class="hidden space-y-4">
+      <div class="bg-white border-2 border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+        <h2 class="text-lg font-black text-slate-900">Dein Spickzettel: Alle 3 Potenzgesetze &amp; Schritt-für-Schritt-Hilfen</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-4 border-2 border-slate-700 rounded-lg bg-slate-50 space-y-2">
+            <span class="text-xs font-black uppercase px-2 py-0.5 bg-slate-800 text-white rounded">1. Potenzgesetz</span>
+            <h3 class="font-bold text-base text-slate-900">Gleiche Basis (unten gleich)</h3>
+            <div class="math text-sm bg-white p-2 rounded border">
+              a<sup>n</sup> &middot; a<sup>m</sup> = a<sup>n+m</sup><br>
+              a<sup>n</sup> : a<sup>m</sup> = a<sup>n&minus;m</sup>
+            </div>
+            <p class="text-xs text-slate-700"><b>Regel:</b> Die Basis bleibt gleich. Beim Malnehmen rechnet man die Exponenten <b>PLUS</b>, beim Teilen <b>MINUS</b>.</p>
+            <p class="text-xs text-slate-600"><b>Tipp:</b> Steht bei <span class="math">z &middot; z<sup>5</sup></span> keine Hochzahl, denk dir eine <b>1</b>: <span class="math">z<sup>1</sup> &middot; z<sup>5</sup> = z<sup>6</sup></span>.</p>
+          </div>
+
+          <div class="p-4 border-2 border-slate-700 rounded-lg bg-slate-50 space-y-2">
+            <span class="text-xs font-black uppercase px-2 py-0.5 bg-slate-800 text-white rounded">2. Potenzgesetz</span>
+            <h3 class="font-bold text-base text-slate-900">Gleicher Exponent (oben gleich)</h3>
+            <div class="math text-sm bg-white p-2 rounded border">
+              a<sup>n</sup> &middot; b<sup>n</sup> = (a &middot; b)<sup>n</sup><br>
+              a<sup>n</sup> : b<sup>n</sup> = (a : b)<sup>n</sup>
+            </div>
+            <p class="text-xs text-slate-700"><b>Regel:</b> Man rechnet die unteren Zahlen in einer Klammer zusammen und <b>behält den Exponenten bei</b>.</p>
+            <p class="text-xs text-slate-600"><b>Beispiel:</b> <span class="math">4<sup>2</sup> &middot; 5<sup>2</sup> = (4 &middot; 5)<sup>2</sup> = 20<sup>2</sup> = 400</span>.</p>
+          </div>
+
+          <div class="p-4 border-2 border-slate-700 rounded-lg bg-slate-50 space-y-2">
+            <span class="text-xs font-black uppercase px-2 py-0.5 bg-slate-800 text-white rounded">3. Potenzgesetz</span>
+            <h3 class="font-bold text-base text-slate-900">Potenz einer Potenz</h3>
+            <div class="math text-sm bg-white p-2 rounded border">
+              (a<sup>n</sup>)<sup>m</sup> = a<sup>n &middot; m</sup>
+            </div>
+            <p class="text-xs text-slate-700"><b>Regel:</b> Steht eine Potenz in einer Klammer mit einer weiteren Hochzahl außen, werden die Exponenten <b>multipliziert</b>.</p>
+            <p class="text-xs text-slate-600"><b>Kombi-Tipp:</b> Erst Klammer auflösen, dann Plus/Minus: <span class="math">(x<sup>2</sup>)<sup>5</sup> &middot; x<sup>3</sup> = x<sup>10</sup> &middot; x<sup>3</sup> = x<sup>13</sup></span>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // --- AUFGABENDATEN FÜR RUNDE 1 & RUNDE 2 (EXAKT WIE AUF DEM ARBEITSBLATT) ---
+    const runde1Data = [
+      {
+        stufe: "Stufe 1",
+        items: [
+          { id: "r1s1a", label: "a) 2<sup>3</sup> &middot; 2<sup>5</sup> =", valid: ["2^8", "256"], chip: "2<sup>8</sup>", hint: "Gleiche Basis 2 &rarr; Exponenten addieren: 3 + 5." },
+          { id: "r1s1b", label: "b) 4<sup>2</sup> &middot; 5<sup>2</sup> =", valid: ["400", "20^2"], chip: "400", hint: "Gleicher Exponent 2 &rarr; (4 &middot; 5)<sup>2</sup> = 20<sup>2</sup> = 20 &middot; 20." },
+          { id: "r1s1c", label: "c) (3<sup>2</sup>)<sup>3</sup> =", valid: ["3^6", "729"], chip: "3<sup>6</sup>", hint: "Klammer mit Hochzahl außen &rarr; Exponenten malnehmen: 2 &middot; 3." },
+          { id: "r1s1d", label: "d) 5<sup>6</sup> : 5<sup>2</sup> =", valid: ["5^4", "625"], chip: "5<sup>4</sup>", hint: "Gleiche Basis 5 und Geteilt &rarr; Exponenten minus rechnen: 6 &minus; 2." }
+        ]
+      },
+      {
+        stufe: "Stufe 2",
+        items: [
+          { id: "r1s2a", label: "a) x<sup>4</sup> &middot; x<sup>6</sup> =", valid: ["x^10"], chip: "x<sup>10</sup>", hint: "Gleiche Basis x &rarr; Exponenten plus rechnen: 4 + 6." },
+          { id: "r1s2b", label: "b) (y<sup>3</sup>)<sup>4</sup> =", valid: ["y^12"], chip: "y<sup>12</sup>", hint: "Potenz einer Potenz &rarr; Exponenten malnehmen: 3 &middot; 4." },
+          { id: "r1s2c", label: "c) a<sup>3</sup> &middot; b<sup>3</sup> =", valid: ["(ab)^3", "(a*b)^3", "a^3b^3"], chip: "(ab)<sup>3</sup>", hint: "Gleicher Exponent 3 &rarr; Basen in Klammer schreiben: (ab)^3." },
+          { id: "r1s2d", label: "d) 18<sup>2</sup> : 6<sup>2</sup> =", valid: ["9", "3^2"], chip: "9", hint: "Gleicher Exponent 2 &rarr; (18 : 6)<sup>2</sup> = 3<sup>2</sup> = 9." }
+        ]
+      },
+      {
+        stufe: "Stufe 3",
+        items: [
+          { id: "r1s3a", label: "a) 10<sup>5</sup> &middot; 10<sup>2</sup> : 10<sup>3</sup> =", valid: ["10^4", "10000"], chip: "10<sup>4</sup>", hint: "Gleiche Basis 10 &rarr; Exponenten: 5 + 2 &minus; 3 = 4." },
+          { id: "r1s3b", label: "b) (x<sup>2</sup>)<sup>5</sup> &middot; x<sup>3</sup> =", valid: ["x^13"], chip: "x<sup>13</sup>", hint: "1. Schritt Klammer: x^(2*5) = x^10. 2. Schritt: x^10 * x^3 = x^(10+3)." },
+          { id: "r1s3c", label: "c) (<span class='frac'><span>1</span><span>2</span></span>)<sup>3</sup> &middot; 8<sup>3</sup> =", valid: ["64", "4^3"], chip: "64", hint: "Gleicher Exponent 3 &rarr; (1/2 &middot; 8)<sup>3</sup> = 4<sup>3</sup> = 4 &middot; 4 &middot; 4 = 64." },
+          { id: "r1s3d", label: "d) [(a<sup>2</sup>)<sup>3</sup>]<sup>2</sup> : a<sup>4</sup> =", valid: ["a^8"], chip: "a<sup>8</sup>", hint: "Erst Klammer-Exponenten malnehmen (2&middot;3&middot;2 = 12), dann minus 4." }
+        ]
+      }
+    ];
+
+    const runde2Data = [
+      {
+        stufe: "Stufe 1",
+        items: [
+          { id: "r2s1a", label: "a) 10<sup>3</sup> &middot; 10<sup>4</sup> =", valid: ["10^7", "10000000"], chip: "10<sup>7</sup>", hint: "Gleiche Basis 10 &rarr; Exponenten addieren: 3 + 4." },
+          { id: "r2s1b", label: "b) 2<sup>4</sup> &middot; 5<sup>4</sup> =", valid: ["10000", "10^4"], chip: "10 000", hint: "(2 &middot; 5)<sup>4</sup> = 10<sup>4</sup> = 10 000." },
+          { id: "r2s1c", label: "c) (2<sup>3</sup>)<sup>2</sup> =", valid: ["64", "2^6"], chip: "2<sup>6</sup>=64", hint: "Exponenten malnehmen: 2^(3*2) = 2^6 = 64." },
+          { id: "r2s1d", label: "d) 7<sup>5</sup> : 7<sup>3</sup> =", valid: ["49", "7^2"], chip: "7<sup>2</sup>=49", hint: "Gleiche Basis 7 &rarr; 7^(5-3) = 7^2 = 49." }
+        ]
+      },
+      {
+        stufe: "Stufe 2",
+        items: [
+          { id: "r2s2a", label: "a) z &middot; z<sup>5</sup> =", valid: ["z^6"], chip: "z<sup>6</sup>", hint: "Denk an die unsichtbare 1: z^1 &middot; z^5 = z^(1+5)." },
+          { id: "r2s2b", label: "b) (a<sup>4</sup>)<sup>2</sup> &middot; a<sup>2</sup> =", valid: ["a^10"], chip: "a<sup>10</sup>", hint: "Erst (a^4)^2 = a^8, dann a^8 &middot; a^2 = a^(8+2)." },
+          { id: "r2s2c", label: "c) 20<sup>3</sup> : 5<sup>3</sup> =", valid: ["64", "4^3"], chip: "4<sup>3</sup>=64", hint: "Gleicher Exponent 3 &rarr; (20 : 5)<sup>3</sup> = 4<sup>3</sup> = 64." },
+          { id: "r2s2d", label: "d) m<sup>5</sup> &middot; n<sup>5</sup> =", valid: ["(mn)^5", "(m*n)^5", "m^5n^5"], chip: "(mn)<sup>5</sup>", hint: "Gleicher Exponent 5 &rarr; Basen in Klammer: (mn)^5." }
+        ]
+      },
+      {
+        stufe: "Stufe 3",
+        items: [
+          { id: "r2s3a", label: "a) 2<sup>4</sup> &middot; 5<sup>4</sup> : 10<sup>2</sup> =", valid: ["100", "10^2"], chip: "10<sup>2</sup>=100", hint: "1. Schritt: 2^4 &middot; 5^4 = 10^4. 2. Schritt: 10^4 : 10^2 = 10^2 = 100." },
+          { id: "r2s3b", label: "b) (x<sup>3</sup>)<sup>4</sup> : x<sup>6</sup> =", valid: ["x^6"], chip: "x<sup>6</sup>", hint: "Erst (x^3)^4 = x^12, dann x^12 : x^6 = x^(12-6)." },
+          { id: "r2s3c", label: "c) 3<sup>2</sup> &middot; 3<sup>3</sup> &middot; 3<sup>1</sup> =", valid: ["3^6", "729"], chip: "3<sup>6</sup>", hint: "Alle drei Exponenten addieren: 2 + 3 + 1 = 6." },
+          { id: "r2s3d", label: "d) (2x)<sup>3</sup> &middot; (2x)<sup>2</sup> =", valid: ["(2x)^5", "32x^5"], chip: "(2x)<sup>5</sup>", hint: "Die Klammer (2x) ist die gemeinsame Basis &rarr; (2x)^(3+2) = (2x)^5." }
+        ]
+      }
+    ];
+
+    const runde3Data = [
+      { id: "r3a", stufe: "Stufe 1a", expr: "x<sup>2</sup> &middot; x<sup>3</sup> = x<sup>6</sup>", isTrue: false, corr: ["x^5"], hint: "Gleiche Basis x: Werden die Exponenten 2 und 3 addiert oder multipliziert?" },
+      { id: "r3b", stufe: "Stufe 1b", expr: "5<sup>4</sup> : 5<sup>1</sup> = 5<sup>3</sup>", isTrue: true, corr: [], hint: "Gleiche Basis 5 beim Teilen: 4 &minus; 1 = 3." },
+      { id: "r3c", stufe: "Stufe 2a", expr: "(2<sup>3</sup>)<sup>4</sup> = 2<sup>7</sup>", isTrue: false, corr: ["2^12", "4096"], hint: "Potenz einer Potenz (Klammer): Exponenten müssen multipliziert werden (3 &middot; 4)!" },
+      { id: "r3d", stufe: "Stufe 2b", expr: "a<sup>4</sup> &middot; b<sup>4</sup> = (ab)<sup>4</sup>", isTrue: true, corr: [], hint: "2. Potenzgesetz: Gleicher Exponent 4 bleibt erhalten." },
+      { id: "r3e", stufe: "Stufe 3a", expr: "3<sup>2</sup> &middot; 2<sup>2</sup> = 6<sup>4</sup>", isTrue: false, corr: ["6^2", "36"], hint: "Unten 3 &middot; 2 = 6 stimmt, aber der gleiche Exponent 2 bleibt gleich (wird nicht addiert)!" },
+      { id: "r3f", stufe: "Stufe 3b", expr: "(y<sup>2</sup>)<sup>3</sup> &middot; y<sup>2</sup> = y<sup>8</sup>", isTrue: true, corr: [], hint: "Rechne nach: (y^2)^3 = y^6, und y^6 &middot; y^2 = y^(6+2) = y^8." }
+    ];
+
+    let solved = {};
+
+    function normalize(str) {
+      return str.toLowerCase().replace(/\s+/g, '').replace(/\*/g, '').replace(/,/g, '.');
+    }
+
+    function updateScore() {
+      const total = Object.values(solved).filter(Boolean).length;
+      document.getElementById('score').textContent = total;
+    }
+
+    function toggleHint(id) {
+      document.getElementById(id).classList.toggle('hidden');
+    }
+
+    function renderRoundGrid(containerId, chipsId, data) {
+      const grid = document.getElementById(containerId);
+      const chipsContainer = document.getElementById(chipsId);
+      grid.innerHTML = '';
+      chipsContainer.innerHTML = '';
+
+      data.forEach(col => {
+        const colDiv = document.createElement('div');
+        colDiv.className = "space-y-2.5 bg-slate-50 p-3 rounded-lg border border-slate-200";
+        colDiv.innerHTML = `<div class="font-black text-xs uppercase tracking-wider text-slate-700 border-b pb-1">${col.stufe}</div>`;
+
+        col.items.forEach(item => {
+          const itemDiv = document.createElement('div');
+          itemDiv.id = "box-" + item.id;
+          itemDiv.className = "p-2.5 bg-white border rounded-lg space-y-1.5 transition-all";
+          itemDiv.innerHTML = `
+            <div class="flex items-center justify-between gap-1">
+              <span class="math text-sm">${item.label}</span>
+              <button onclick="toggleHint('hint-${item.id}')" title="Tipp anzeigen" class="text-xs px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100">💡</button>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <input type="text" id="ans-${item.id}" placeholder="Lösung..." class="w-full text-xs font-mono font-bold" onkeydown="if(event.key==='Enter')checkRoundItem('${item.id}')">
+              <button onclick="checkRoundItem('${item.id}')" class="px-2.5 py-1 bg-slate-800 text-white text-xs font-bold rounded hover:bg-slate-900">Prüfen</button>
+            </div>
+            <div id="fb-${item.id}" class="text-xs font-bold"></div>
+            <div id="hint-${item.id}" class="hidden text-xs bg-amber-50 text-amber-900 p-2 rounded border border-amber-200">${item.hint}</div>
+          `;
+          colDiv.appendChild(itemDiv);
+
+          // Chip
+          const chip = document.createElement('span');
+          chip.id = "chip-" + item.id;
+          chip.className = "px-2 py-0.5 bg-white border border-slate-400 rounded font-bold math text-xs";
+          chip.innerHTML = item.chip;
+          chipsContainer.appendChild(chip);
+        });
+
+        grid.appendChild(colDiv);
+      });
+    }
+
+    function renderRound3() {
+      const grid = document.getElementById('r3-grid');
+      grid.innerHTML = '';
+      runde3Data.forEach(item => {
+        const card = document.createElement('div');
+        card.id = "box-" + item.id;
+        card.className = "p-3 bg-slate-50 border rounded-lg space-y-2";
+        card.innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-slate-500">${item.stufe}</span>
+            <button onclick="toggleHint('hint-${item.id}')" class="text-xs px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">💡 Tipp</button>
+          </div>
+          <div class="math text-base bg-white p-2 rounded border text-center">${item.expr}</div>
+          <div class="flex items-center gap-2 text-xs">
+            <button onclick="selectR3('${item.id}', true)" id="btn-true-${item.id}" class="flex-1 py-1.5 font-bold border rounded bg-white hover:bg-slate-100">✅ Wahr</button>
+            <button onclick="selectR3('${item.id}', false)" id="btn-false-${item.id}" class="flex-1 py-1.5 font-bold border rounded bg-white hover:bg-slate-100">❌ Falsch</button>
+          </div>
+          <div id="corr-wrap-${item.id}" class="hidden flex items-center gap-1.5 pt-1">
+            <input type="text" id="corr-${item.id}" placeholder="Richtiges Ergebnis (z.B. x^5)" class="w-full text-xs font-mono font-bold" onkeydown="if(event.key==='Enter')checkR3Corr('${item.id}')">
+            <button onclick="checkR3Corr('${item.id}')" class="px-2.5 py-1 bg-slate-800 text-white text-xs font-bold rounded">OK</button>
+          </div>
+          <div id="fb-${item.id}" class="text-xs font-bold"></div>
+          <div id="hint-${item.id}" class="hidden text-xs bg-amber-50 text-amber-900 p-2 rounded border border-amber-200">${item.hint}</div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    const allRoundItems = {};
+    [...runde1Data, ...runde2Data].forEach(col => col.items.forEach(it => { allRoundItems[it.id] = it; }));
+
+    function checkRoundItem(id) {
+      const item = allRoundItems[id];
+      const val = normalize(document.getElementById('ans-' + id).value);
+      const box = document.getElementById('box-' + id);
+      const fb = document.getElementById('fb-' + id);
+      const chip = document.getElementById('chip-' + id);
+
+      const validNorm = item.valid.map(normalize);
+      if (validNorm.includes(val)) {
+        box.classList.remove('wrong-card');
+        box.classList.add('correct-card');
+        fb.textContent = "✓ Richtig! Unten im Kasten abgestrichen.";
+        fb.className = "text-xs font-bold text-emerald-700";
+        if (chip) chip.classList.add('chip-done');
+        solved[id] = true;
+      } else {
+        box.classList.remove('correct-card');
+        box.classList.add('wrong-card');
+        fb.textContent = "✗ Noch nicht richtig – klicke auf 💡 für einen Tipp!";
+        fb.className = "text-xs font-bold text-rose-700";
+        solved[id] = false;
+      }
+      updateScore();
+    }
+
+    function selectR3(id, choiceTrue) {
+      const item = runde3Data.find(x => x.id === id);
+      const box = document.getElementById('box-' + id);
+      const fb = document.getElementById('fb-' + id);
+      const corrWrap = document.getElementById('corr-wrap-' + id);
+
+      if (choiceTrue === item.isTrue) {
+        if (item.isTrue) {
+          box.classList.remove('wrong-card');
+          box.classList.add('correct-card');
+          corrWrap.classList.add('hidden');
+          fb.textContent = "✓ Super! Die Rechnung stimmt.";
+          fb.className = "text-xs font-bold text-emerald-700";
+          solved[id] = true;
+        } else {
+          box.classList.remove('wrong-card');
+          corrWrap.classList.remove('hidden');
+          fb.textContent = "✓ Richtig erkannt (Falsch)! Tippe jetzt noch die Korrektur ein:";
+          fb.className = "text-xs font-bold text-blue-700";
+        }
+      } else {
+        box.classList.remove('correct-card');
+        box.classList.add('wrong-card');
+        corrWrap.classList.add('hidden');
+        fb.textContent = "✗ Schau nochmal in den 💡 Tipp!";
+        fb.className = "text-xs font-bold text-rose-700";
+        solved[id] = false;
+      }
+      updateScore();
+    }
+
+    function checkR3Corr(id) {
+      const item = runde3Data.find(x => x.id === id);
+      const val = normalize(document.getElementById('corr-' + id).value);
+      const box = document.getElementById('box-' + id);
+      const fb = document.getElementById('fb-' + id);
+
+      if (item.corr.map(normalize).includes(val)) {
+        box.classList.remove('wrong-card');
+        box.classList.add('correct-card');
+        fb.textContent = "✓ Perfekt korrigiert!";
+        fb.className = "text-xs font-bold text-emerald-700";
+        solved[id] = true;
+      } else {
+        fb.textContent = "✗ Die Korrektur stimmt noch nicht ganz.";
+        fb.className = "text-xs font-bold text-rose-700";
+      }
+      updateScore();
+    }
+
+    function checkSelect(selectId, correctVal, fbId, boxId) {
+      const val = document.getElementById(selectId).value;
+      const fb = document.getElementById(fbId);
+      const box = document.getElementById(boxId);
+      if (val === correctVal) {
+        fb.textContent = "✓ Richtig!";
+        fb.className = "text-xs font-bold text-emerald-700";
+        box.classList.remove('wrong-card');
+        box.classList.add('correct-card');
+        solved[selectId] = true;
+      } else if (val) {
+        fb.textContent = "✗ Noch nicht richtig";
+        fb.className = "text-xs font-bold text-rose-700";
+        box.classList.remove('correct-card');
+        box.classList.add('wrong-card');
+        solved[selectId] = false;
+      }
+      updateScore();
+    }
+
+    function checkInput(id, validArr) {
+      const val = normalize(document.getElementById('ans-' + id).value);
+      const fb = document.getElementById('fb-' + id);
+      const box = document.getElementById('box-' + id);
+      if (validArr.map(normalize).includes(val)) {
+        fb.textContent = "✓ Richtig!";
+        fb.className = "text-xs font-bold text-emerald-700";
+        box.classList.remove('wrong-card');
+        box.classList.add('correct-card');
+        solved[id] = true;
+      } else {
+        fb.textContent = "✗ Nochmal prüfen";
+        fb.className = "text-xs font-bold text-rose-700";
+        box.classList.remove('correct-card');
+        box.classList.add('wrong-card');
+        solved[id] = false;
+      }
+      updateScore();
+    }
+
+    function switchTab(tabId) {
+      ['tab-sprache', 'tab-trainer', 'tab-spickzettel'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      document.getElementById(tabId).classList.remove('hidden');
+
+      const map = {
+        'tab-sprache': 'btn-sprache',
+        'tab-trainer': 'btn-trainer',
+        'tab-spickzettel': 'btn-spickzettel'
+      };
+      Object.entries(map).forEach(([tId, bId]) => {
+        const btn = document.getElementById(bId);
+        if (tId === tabId) {
+          btn.className = "px-4 py-2.5 font-bold text-sm rounded-t-lg bg-slate-900 text-white";
+        } else {
+          btn.className = "px-4 py-2.5 font-bold text-sm rounded-t-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-200";
+        }
+      });
+    }
+
+    // --- TAKTPUNKT-TIMER LOGIK ---
+    let totalSeconds = 8 * 60;
+    let remainingSeconds = 8 * 60;
+    let timerInterval = null;
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60).toString().padStart(2, '0');
+      const s = (sec % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function updateTimerUI() {
+      const disp = document.getElementById('timer-display');
+      const bar = document.getElementById('timer-bar');
+      disp.textContent = formatTime(remainingSeconds);
+      const pct = totalSeconds > 0 ? (remainingSeconds / totalSeconds) * 100 : 0;
+      bar.style.width = pct + "%";
+      if (remainingSeconds <= 60) {
+        disp.className = "text-xl font-mono font-black text-rose-600";
+        bar.className = "bg-rose-600 h-full transition-all duration-500";
+      } else {
+        disp.className = "text-xl font-mono font-black text-slate-900";
+        bar.className = "bg-emerald-600 h-full transition-all duration-500";
+      }
+    }
+
+    function setTimer(minutes) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      totalSeconds = minutes * 60;
+      remainingSeconds = totalSeconds;
+      updateTimerUI();
+    }
+
+    function toggleTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      } else {
+        timerInterval = setInterval(() => {
+          if (remainingSeconds > 0) {
+            remainingSeconds--;
+            updateTimerUI();
+          } else {
+            clearInterval(timerInterval);
+            timerInterval = null;
+          }
+        }, 1000);
+      }
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      remainingSeconds = totalSeconds;
+      updateTimerUI();
+    }
+
+    // Init
+    renderRoundGrid('r1-grid', 'chips-r1', runde1Data);
+    renderRoundGrid('r2-grid', 'chips-r2', runde2Data);
+    renderRound3();
+    updateTimerUI();
+  </script>
+</body>
+</html>
